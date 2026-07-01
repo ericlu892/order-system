@@ -18,9 +18,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'jinshi-order-system-2026';
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
-const DB_PATH = path.join(__dirname, 'data', 'order_system.db');
+const DB_PATH = path.join(__dirname, '..', 'data', 'order_system.db');
 const DB_DIR = path.dirname(DB_PATH);
 if (!fs.existsSync(DB_DIR)) fs.mkdirSync(DB_DIR, { recursive: true });
 const UPLOAD_DIR = path.join(DB_DIR, 'uploads');
