@@ -1,7 +1,9 @@
 ﻿node_modules/
+.env
 uploads/
 temp/
 *.bak
 server.log
+data/order_system_blank.db
 !data/order_system.db
 !data/
