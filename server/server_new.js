@@ -7,7 +7,8 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
-const Database = require('better-sqlite3');
+const Database = require('./sqlite_compat').Database;
+const { createDatabase } = require('./sqlite_compat');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
@@ -27,9 +28,31 @@ const UPLOAD_DIR = path.join(DB_DIR, 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 const upload = multer({ dest: UPLOAD_DIR, limits: { fileSize: 50 * 1024 * 1024 } });
 
-const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+let db;
+
+const fs2 = require('fs');
+const logFile = path.join(__dirname, '..', 'server_debug.log');
+function log(msg) { fs2.appendFileSync(logFile, new Date().toISOString() + ' ' + msg + '\n'); }
+
+async function initDb() {
+  try {
+    log('[initDb] creating database...');
+    db = await createDatabase(DB_PATH);
+    log('[initDb] setting pragma...');
+    db._db.exec('PRAGMA foreign_keys = ON');
+    log('[initDb] calling initApp...');
+    await initApp();
+    log('[initDb] initApp completed successfully');
+  } catch(e) {
+    log('[initDb] FAILED: ' + e.message);
+    log(e.stack);
+    process.exit(1);
+  }
+}
+
+initDb().catch(e => { console.error('initDb FAILED:', e); process.exit(1); });
+
+async function initApp() {
 
 // ── 权限定义 ──
 const ALL_PERMISSIONS = {
@@ -150,7 +173,7 @@ function seed() {
     ['市场部','技术部','运营部','财务部','内勤部'].forEach(n => db.prepare("INSERT INTO departments (id,name) VALUES (?,?)").run(uuidv4(), n));
   }
 }
-initDB(); seed();
+  initDB(); seed();
 // ── 数据迁移：employees.user_id 反向填充 + 删除旧关联表 ──
 function migrateV2() {
   try {
@@ -719,10 +742,15 @@ app.get('/api/provinces', (req, res) => {
 });
 
 // ── 前端路由 ──
-app.get('/index_new.html', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index_new.html')));
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index_new.html')));
+app.get('/index_new.html', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index_new.html')));
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '..', 'public', 'index_new.html')));
 
 app.listen(PORT, () => {
   console.log(`✅ 金石立美订单管理系统 http://localhost:${PORT}/index_new.html`);
   console.log(`🔑 admin / admin123`);
 });
+
+} // end initApp
+
+
+

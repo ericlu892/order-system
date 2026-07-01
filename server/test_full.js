@@ -1,10 +1,10 @@
 const http = require('http');
-const base = 'http://localhost:8765';
+const base = 'http://localhost:8766';
 const loginData = JSON.stringify({ username: 'admin', password: 'admin123' });
 
 function req(method, path, data, token) {
   return new Promise((resolve, reject) => {
-    const opts = { method, hostname: 'localhost', port: 8765, path, headers: {} };
+    const opts = { method, hostname: 'localhost', port: 8766, path, headers: {} };
     if (data) opts.headers['Content-Type'] = 'application/json';
     if (data) opts.headers['Content-Length'] = Buffer.byteLength(data);
     if (token) opts.headers['Authorization'] = 'Bearer ' + token;
