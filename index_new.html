@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>金石立美订单管理系统</title>
+<style>
+:root{--pri:#2563eb;--pri2:#1d4ed8;--bg:#f0f2f5;--card:#fff;--text:#1f2937;--sub:#6b7280;--bd:#e5e7eb;--success:#10b981;--warn:#f59e0b;--danger:#ef4444;--radius:8px;--shadow:0 1px 3px rgba(0,0,0,.1)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+.login-wrap{display:flex;justify-content:center;align-items:center;min-height:100vh;background:linear-gradient(135deg,#1e293b 0%,#0f172a 50%,#1e3a5f 100%)}
+.login-card{background:var(--card);border-radius:16px;padding:40px;width:380px;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center}
+.login-card .logo{width:64px;height:64px;border-radius:12px;background:#fff;padding:4px;margin-bottom:12px}
+.login-card h1{font-size:20px;margin-bottom:4px}.login-card .sub{font-size:13px;color:var(--sub);margin-bottom:24px}
+.login-card .err{background:#fee2e2;color:#991b1b;padding:8px 12px;border-radius:6px;font-size:12px;margin-bottom:12px}
+.login-card .inp{width:100%;padding:10px 12px;margin-bottom:10px}
+.login-card .btn{width:100%;padding:10px;font-size:14px;margin-top:4px}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:230px;background:linear-gradient(180deg,#1e293b 0%,#0f172a 100%);color:#fff;flex-shrink:0;overflow-y:auto}
+.side-logo{text-align:center;padding:20px 16px 16px;border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:8px}
+.side-logo img{width:52px;height:52px;border-radius:10px;background:#fff;padding:3px;margin-bottom:6px}
+.side-logo .name{font-size:15px;font-weight:700;letter-spacing:2px}
+.side-logo .sub{font-size:11px;color:#94a3b8;margin-top:2px}
+.nav-section{padding:8px 12px 4px;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;color:#94a3b8;cursor:pointer;transition:all .2s;font-size:13px;border-left:3px solid transparent}
+.nav-item:hover{color:#e2e8f0;background:rgba(255,255,255,.04)}
+.nav-item.active{color:#fff;background:rgba(37,99,235,.15);border-left-color:#3b82f6}
+.nav-item .i{font-size:16px;width:20px;text-align:center}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.header{background:var(--card);padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);z-index:10;flex-shrink:0}
+.header h2{font-size:15px;font-weight:600}
+.header .user{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--sub)}
+.content{flex:1;padding:20px 24px;overflow-y:auto}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+.card h3{font-size:14px;margin-bottom:12px}
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.stat-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 20px}
+.stat-card .label{font-size:12px;color:var(--sub)}
+.stat-card .value{font-size:26px;font-weight:700;margin:4px 0}
+.stat-card.blue .value{color:var(--pri)}.stat-card.green .value{color:var(--success)}
+.stat-card.orange .value{color:var(--warn)}.stat-card.purple .value{color:#8b5cf6}
+.stat-card.red .value{color:var(--danger)}
+.toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.inp,.sel{padding:7px 11px;border:1px solid var(--bd);border-radius:6px;font-size:13px;outline:none;background:#fff;color:var(--text)}
+.inp:focus,.sel:focus{border-color:var(--pri);box-shadow:0 0 0 3px rgba(37,99,235,.08)}
+textarea.inp{font-family:inherit}
+.btn{padding:7px 14px;border:none;border-radius:6px;font-size:13px;cursor:pointer;font-weight:500;transition:.2s;white-space:nowrap}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn-p{background:var(--pri);color:#fff}.btn-p:hover:not(:disabled){background:var(--pri2)}
+.btn-o{background:#fff;border:1px solid var(--bd);color:var(--text)}.btn-o:hover{background:var(--bg)}
+.btn-s{background:var(--success);color:#fff}.btn-w{background:var(--warn);color:#fff}
+.btn-d{background:var(--danger);color:#fff}.btn-sm{padding:4px 9px;font-size:12px}
+.link{color:var(--pri);cursor:pointer;text-decoration:none;font-size:13px}
+.link:hover{text-decoration:underline}.link-d{color:var(--danger)}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#f8fafc;padding:9px 10px;text-align:left;font-weight:600;color:var(--sub);border-bottom:2px solid var(--bd);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--bd)}
+tr:hover{background:#f8fafc}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.tag-draft{background:#e2e8f0;color:#475569}.tag-pending{background:#fef3c7;color:#92400e}
+.tag-assigned{background:#dbeafe;color:#1e40af}.tag-designed{background:#e0e7ff;color:#3730a3}
+.tag-received{background:#d1fae5;color:#047857}.tag-delivered{background:#047857;color:#fff}
+.tag-cancelled{background:#fee2e2;color:#991b1b}
+.tag-engineer{background:#e0e7ff;color:#3730a3}.tag-tech_leader{background:#dbeafe;color:#1e40af}
+.modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);display:flex;justify-content:center;align-items:flex-start;padding-top:30px;z-index:100;overflow-y:auto}
+.modal-content{background:var(--card);border-radius:12px;width:92%;max-width:700px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.25);margin-bottom:30px}
+.modal-wide{max-width:900px}
+.modal h3{margin-bottom:16px;font-size:15px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.frow3{grid-template-columns:1fr 1fr 1fr}
+.fg{display:flex;flex-direction:column;gap:3px}
+.fg label{font-size:12px;color:var(--sub);font-weight:500}
+.fg-full{grid-column:1/-1}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding-top:14px;border-top:1px solid var(--bd)}
+.toast{position:fixed;top:16px;right:16px;z-index:300;display:flex;flex-direction:column;gap:6px}
+.toast-msg{padding:10px 18px;border-radius:8px;font-size:13px;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.2);animation:slideIn .3s}
+.toast-msg.s{background:var(--success)}.toast-msg.e{background:var(--danger)}.toast-msg.w{background:var(--warn)}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.breadcrumb{font-size:13px;color:var(--sub);margin-bottom:14px}
+.breadcrumb span{color:var(--text)}
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;margin-bottom:12px}
+.dg3{grid-template-columns:1fr 1fr 1fr}
+.dg-label{font-size:12px;color:var(--sub);font-weight:500;line-height:1.8}
+.dg-value{font-size:14px;color:var(--text);padding-bottom:6px;word-break:break-all}
+.dg-card{border:1px solid var(--bd);border-radius:8px;padding:12px 16px;margin-bottom:12px;background:#fff}
+.dg-card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bd)}
+.dg-grid{display:grid;grid-template-columns:80px 1fr;gap:2px 12px}
+.chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+.empty{text-align:center;padding:40px 20px;color:var(--sub)}.empty .icon{font-size:40px;margin-bottom:8px}
+.pagination{display:flex;gap:6px;justify-content:center;align-items:center;margin-top:14px}
+.pagination button{padding:5px 11px;border:1px solid var(--bd);border-radius:4px;background:#fff;cursor:pointer;font-size:12px}
+.pagination button.active{background:var(--pri);color:#fff;border-color:var(--pri)}
+.tabs{display:flex;gap:0;margin-bottom:14px;border-bottom:2px solid var(--bd)}
+.tab{padding:8px 16px;cursor:pointer;font-size:13px;color:var(--sub);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.2s}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--pri);border-bottom-color:var(--pri);font-weight:600}
+.info-row{padding:12px;background:#f8fafc;border-radius:6px;margin-bottom:10px;font-size:13px;display:flex;gap:20px;flex-wrap:wrap}
+.info-row span{color:var(--sub)}
+.monitor-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px}
+.monitor-item{background:#f8fafc;border-radius:8px;padding:14px;text-align:center}
+.monitor-item .val{font-size:22px;font-weight:700;color:var(--pri)}
+.monitor-item .lbl{font-size:12px;color:var(--sub);margin-top:4px}
+.progress-bar{height:6px;background:var(--bd);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-bar .fill{height:100%;border-radius:3px;transition:.3s}
+.fill-g{background:var(--success)}.fill-b{background:var(--pri)}.fill-o{background:var(--warn)}.fill-r{background:var(--danger)}
+.perm-group{margin-bottom:12px}
+.perm-group h4{font-size:13px;font-weight:600;margin-bottom:6px;color:var(--pri);border-bottom:1px solid var(--bd);padding-bottom:4px}
+.perm-group .perm-list{display:flex;flex-wrap:wrap;gap:6px 14px}
+.perm-group .perm-item{display:flex;align-items:center;gap:5px;font-size:12px;cursor:pointer;padding:3px 8px;border-radius:4px;transition:.15s}
+.perm-group .perm-item:hover{background:var(--bg)}
+.perm-group .perm-item input{cursor:pointer}
+@media(max-width:900px){.sidebar{width:56px}.sidebar .nav-item span,.sidebar .side-logo .name,.sidebar .side-logo .sub,.sidebar .nav-section{display:none}.frow,.frow3{grid-template-columns:1fr}.chart-row{grid-template-columns:1fr}.dg{grid-template-columns:1fr}}
+</style>
+</head>
+<body><div id="app">
+
+<!-- ===== 登录页 ===== -->
+<div v-if="!loggedIn" class="login-wrap">
+<div class="login-card">
+  <img src="金石立美Logo.png" alt="logo" class="logo" onerror="this.style.display='none'">
+  <h1>金石立美</h1><div class="sub">订单管理系统</div>
+  <div v-if="loginErr" class="err">{{loginErr}}</div>
+  <input class="inp" v-model="loginForm.username" placeholder="账号" @keyup.enter="doLogin()">
+  <input class="inp" type="password" v-model="loginForm.password" placeholder="密码" @keyup.enter="doLogin()">
+  <button class="btn btn-p" @click="doLogin()" :disabled="loginLoading">{{loginLoading?'登录中...':'登 录'}}</button>
+  <div style="margin-top:12px;font-size:11px;color:var(--sub)">默认 admin / admin123</div>
+</div></div>
+
+<!-- ===== 主界面 ===== -->
+<div v-else class="layout">
+<div class="sidebar">
+  <div class="side-logo">
+    <img src="金石立美Logo.png" alt="logo" onerror="this.style.display='none'">
+    <div class="name">金石立美</div><div class="sub">订单管理系统</div>
+  </div>
+  <div class="nav-section">核心业务</div>
+  <div class="nav-item" :class="{active:page==='dash'}" @click="page='dash';loadDash()"><span class="i">📊</span> <span>首页仪表板</span></div>
+  <div class="nav-item" v-if="hasPerm('hospitals:view')" :class="{active:page==='hosp'}" @click="page='hosp';loadHospitals()"><span class="i">🏥</span> <span>医院管理</span></div>
+  <div class="nav-item" v-if="hasPerm('orders:view')" :class="{active:page==='order'}" @click="page='order';loadOrders()"><span class="i">📋</span> <span>订单管理</span></div>
+  <div class="nav-item" v-if="hasPerm('stats:view')" :class="{active:page==='stat'}" @click="page='stat';loadStats()"><span class="i">📈</span> <span>订单统计</span></div>
+  <div class="nav-section">业务管理</div>
+  <div class="nav-item" v-if="hasPerm('agents:view')" :class="{active:page==='agent'}" @click="page='agent';loadAgents()"><span class="i">🤝</span> <span>代理商管理</span></div>
+  <div class="nav-item" v-if="hasPerm('employees:view')" :class="{active:page==='emp'}" @click="page='emp';loadEmployees()"><span class="i">👥</span> <span>人员管理</span></div>
+  <div class="nav-section">系统管理</div>
+  <div class="nav-item" v-if="hasPerm('users:view')" :class="{active:page==='user'}" @click="page='user';loadUsers()"><span class="i">👤</span> <span>用户管理</span></div>
+  <div class="nav-item" v-if="hasPerm('departments:view')" :class="{active:page==='dept'}" @click="page='dept';loadDepartments()"><span class="i">🏢</span> <span>部门管理</span></div>
+  <div class="nav-item" v-if="hasPerm('roles:view')" :class="{active:page==='role'}" @click="page='role';loadRoles()"><span class="i">🔐</span> <span>权限管理</span></div>
+  <div class="nav-item" v-if="hasPerm('config:view')" :class="{active:page==='cfg'}" @click="page='cfg';loadConfig()"><span class="i">⚙️</span> <span>参数配置</span></div>
+  <div class="nav-item" v-if="hasPerm('logs:view')" :class="{active:page==='log'}" @click="page='log';loadLogs()"><span class="i">📝</span> <span>操作日志</span></div>
+  <div class="nav-item" v-if="hasPerm('monitor:view')" :class="{active:page==='mon'}" @click="page='mon';loadMonitor()"><span class="i">🖥️</span> <span>系统监控</span></div>
+</div>
+<div class="main">
+<div class="header"><h2>{{pageTitle}}</h2><div class="user">🔔 <a class="link" @click="openNotifPanel()" style="position:relative">通知 <span v-if="dh.unreadNotifs>0" style="background:var(--danger);color:#fff;border-radius:10px;padding:1px 6px;font-size:11px">{{dh.unreadNotifs>99?'99+':dh.unreadNotifs}}</span></a> | 🔐 {{user.role_name}} | 👤 {{user.real_name||user.username}} <a class="link link-d" @click="logout()" style="margin-left:8px">退出</a></div></div>
+<div class="content">
+
+<!-- ===== 仪表板 ===== -->
+<template v-if="page==='dash'">
+<div class="stats">
+  <div class="stat-card blue"><div class="label">总订单数</div><div class="value">{{dh.orderCount}}</div></div>
+  <div class="stat-card green"><div class="label">合作医院</div><div class="value">{{dh.hospitalCount}}</div></div>
+  <div class="stat-card orange"><div class="label">今日订单</div><div class="value">{{dh.todayOrders}}</div></div>
+  <div class="stat-card purple"><div class="label">处理中</div><div class="value">{{dh.pendingOrders}}</div></div>
+  <div class="stat-card red"><div class="label">本月营收</div><div class="value">¥{{F(dh.monthRevenue)}}</div></div>
+  <div class="stat-card blue"><div class="label">代理商</div><div class="value">{{dh.agentCount}}</div></div>
+</div>
+<div class="card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+    <h3 style="margin:0">最近订单</h3>
+    <div>
+      <button class="btn btn-p btn-sm" v-if="hasPerm('orders:create')" @click="page='order';openOrderForm()">+ 新建订单</button>
+      <button class="btn btn-o btn-sm" style="margin-left:6px" v-if="hasPerm('hospitals:create')" @click="page='hosp'">+ 新增医院</button>
+    </div>
+  </div>
+  <table><thead><tr><th>订单编号</th><th>医院</th><th>科室</th><th>类型</th><th>患者</th><th>金额</th><th>状态</th><th>时间</th></tr></thead><tbody>
+    <tr v-for="r in dh.recentOrders" :key="r.order_no" style="cursor:pointer" @click="doPageOrderDetail(r.order_no)">
+      <td style="font-weight:500">{{r.order_no}}</td><td>{{r.hospital_name||'-'}}</td><td>{{r.dept_name||'-'}}</td><td>{{r.order_type||'-'}}</td><td>{{r.patient_name||'-'}}</td>
+      <td>¥{{F(r.total_price)}}</td><td><span :class="'tag tag-'+r.status">{{S(r.status)}}</span></td><td>{{D(r.created_at)}}</td>
+    </tr>
+  </tbody></table>
+</div>
+</template>
+
+<!-- ===== 医院管理 ===== -->
+<template v-if="page==='hosp'">
+<div v-if="!showHd">
+<div class="toolbar">
+  <input class="inp" placeholder="搜索医院..." v-model="h.s" @keyup.enter="loadHospitals()">
+  <select class="sel" v-model="h.p" @change="loadHospitals()"><option value="">全部省份</option><option v-for="p in provinces" :value="p">{{p}}</option></select>
+  <button class="btn btn-p" @click="loadHospitals()">🔍</button>
+  <button class="btn btn-s" v-if="hasPerm('hospitals:create')" @click="openHospForm()">+ 新增医院</button>
+</div>
+<div class="card" style="padding:0">
+<table><thead><tr><th>医院名称</th><th>简称</th><th>省份</th><th>城市</th><th>等级</th><th>类型</th><th>联系人</th><th>电话</th><th>时间</th><th>操作</th></tr></thead><tbody>
+  <tr v-for="r in h.items" :key="r.id">
+    <td><strong>{{r.name}}</strong></td><td>{{r.short_name||'-'}}</td><td>{{r.province||'-'}}</td><td>{{r.city||'-'}}</td><td>{{r.level||'-'}}</td><td>{{r.type||'-'}}</td>
+    <td>{{r.contact_name||'-'}}</td><td>{{r.contact_phone||'-'}}</td><td>{{D(r.created_at)}}</td>
+    <td><a class="link" @click.prevent="openHd(r.id)">详情</a> <a v-if="hasPerm('hospitals:edit')" class="link" @click.prevent="editHosp(r)" style="margin:0 6px">编辑</a> <a v-if="hasPerm('hospitals:delete')" class="link link-d" @click.prevent="deleteHosp(r)">删除</a></td>
+  </tr>
+  <tr v-if="!h.items?.length"><td colspan="10" class="empty"><div class="icon">🏥</div>暂无医院数据</td></tr>
+</tbody></table></div></div>
+
+<div v-if="showHd&&hd.data">
+<div class="breadcrumb"><a class="link" @click.prevent="showHd=false">← 返回</a> / <span>{{hd.data.name}}</span></div>
+<div class="card"><h3>基本信息</h3>
+<div class="dg"><div class="dg-label">名称</div><div class="dg-value">{{hd.data.name}}</div><div class="dg-label">简称</div><div class="dg-value">{{hd.data.short_name||'-'}}</div><div class="dg-label">省份/城市</div><div class="dg-value">{{hd.data.province||'-'}} {{hd.data.city||'-'}}</div><div class="dg-label">地址</div><div class="dg-value">{{hd.data.address||'-'}}</div><div class="dg-label">等级/类型</div><div class="dg-value">{{hd.data.level||'-'}} / {{hd.data.type||'-'}}</div><div class="dg-label">联系人</div><div class="dg-value">{{hd.data.contact_name||'-'}}</div><div class="dg-label">电话</div><div class="dg-value">{{hd.data.contact_phone||'-'}}</div><div class="dg-label">邮箱</div><div class="dg-value">{{hd.data.contact_email||'-'}}</div></div>
+<button class="btn btn-p btn-sm" v-if="hasPerm('hospitals:edit')" @click="editHosp(hd.data)">编辑医院</button></div>
+
+<!-- 科室 -->
+<div class="card" v-if="hasPerm('hospitals:dept')"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">科室管理 ({{(hd.data.departments||[]).length}})</h3><button class="btn btn-s btn-sm" @click="nd={name:'',leader:''};showAddDept=true">+ 添加科室</button></div>
+<div v-if="showAddDept" style="display:flex;gap:8px;margin-bottom:10px;padding:10px;background:#f8fafc;border-radius:6px">
+<input class="inp" v-model="nd.name" placeholder="科室名称" style="flex:1"><input class="inp" v-model="nd.leader" placeholder="负责人"><button class="btn btn-s btn-sm" @click="addDept()">确认</button><button class="btn btn-o btn-sm" @click="showAddDept=false">取消</button></div>
+<table><thead><tr><th>科室名称</th><th>负责人</th><th>时间</th><th>操作</th></tr></thead><tbody>
+<tr v-for="d in hd.data.departments" :key="d.id"><td>{{d.name}}</td><td>{{d.leader||'-'}}</td><td>{{D(d.created_at)}}</td><td><a class="link" @click.prevent="nd={name:d.name,leader:d.leader};editDeptId=d.id;showAddDept=true">编辑</a> <a class="link link-d" @click.prevent="deleteDept(d.id)" style="margin-left:6px">删除</a></td></tr>
+<tr v-if="!hd.data.departments?.length"><td colspan="4" class="empty">暂无科室</td></tr>
+</tbody></table></div>
+
+<!-- 医生 -->
+<div class="card" v-if="hasPerm('hospitals:doctor')"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">医生管理 ({{(hd.data.doctors||[]).length}})</h3><button class="btn btn-s btn-sm" @click="ndr={department_id:'',name:'',title:'',specialty:'',phone:'',email:''};showAddDoctor=true">+ 添加医生</button></div>
+<div v-if="showAddDoctor" style="padding:10px;background:#f8fafc;border-radius:6px;margin-bottom:10px">
+<div class="frow"><div class="fg"><input class="inp" v-model="ndr.name" placeholder="姓名"></div><div class="fg"><select class="sel" v-model="ndr.department_id"><option value="">选择科室</option><option v-for="d in hd.data.departments" :value="d.id">{{d.name}}</option></select></div><div class="fg"><input class="inp" v-model="ndr.title" placeholder="职称"></div><div class="fg"><input class="inp" v-model="ndr.specialty" placeholder="专业"></div><div class="fg"><input class="inp" v-model="ndr.phone" placeholder="电话"></div><div class="fg"><input class="inp" v-model="ndr.email" placeholder="邮箱"></div></div>
+<div style="margin-top:8px"><button class="btn btn-s btn-sm" @click="addDoctor()">确认</button><button class="btn btn-o btn-sm" @click="showAddDoctor=false">取消</button></div></div>
+<table><thead><tr><th>姓名</th><th>科室</th><th>职称</th><th>专业</th><th>电话</th><th>邮箱</th><th>操作</th></tr></thead><tbody>
+<tr v-for="d in hd.data.doctors" :key="d.id"><td>{{d.name}}</td><td>{{d.dept_name||'-'}}</td><td>{{d.title||'-'}}</td><td>{{d.specialty||'-'}}</td><td>{{d.phone||'-'}}</td><td>{{d.email||'-'}}</td><td><a class="link link-d" @click.prevent="deleteDoctor(d.id)">删除</a></td></tr>
+<tr v-if="!hd.data.doctors?.length"><td colspan="7" class="empty">暂无医生</td></tr>
+</tbody></table></div>
+
+<div class="card"><h3>🛠️ 技术团队</h3><div v-if="hd.data.tech_members?.length"><table><thead><tr><th>姓名</th><th>职位</th><th>角色</th></tr></thead><tbody>
+<tr v-for="m in hd.data.tech_members" :key="m.employee_id"><td>{{m.name}}</td><td>{{m.position||'-'}}</td><td><span :class="'tag tag-'+m.role_code">{{m.role_code==='tech_leader'?'技术主管':m.role_code==='engineer'?'设计工程师':m.role_code}}</span></td></tr>
+</tbody></table></div><div v-else style="padding:12px;color:var(--sub)">暂无绑定人员，请前往<b>人员管理</b>编辑员工的负责医院来添加技术团队成员</div></div>
+
+<div class="card"><h3>关联订单 (最近20条)</h3><table><thead><tr><th>订单编号</th><th>类型</th><th>患者</th><th>状态</th><th>金额</th><th>时间</th></tr></thead><tbody>
+<tr v-for="r in hd.data.orders" :key="r.order_no"><td style="font-weight:500">{{r.order_no}}</td><td>{{r.order_type||'-'}}</td><td>{{r.patient_name||'-'}}</td><td><span :class="'tag tag-'+r.status">{{S(r.status)}}</span></td><td>¥{{F(r.total_price)}}</td><td>{{D(r.created_at)}}</td></tr>
+</tbody></table></div></div></template>
+
+<!-- ===== 订单管理 ===== -->
+<template v-if="page==='order'">
+<div v-if="!showOd">
+<div class="tabs"><div class="tab" :class="{active:o.tab==='all'}" @click="o.tab='all';o.status='';loadOrders()">全部</div><div class="tab" :class="{active:o.tab==='pending'}" @click="o.tab='pending';o.status='pending';loadOrders()">待指派</div><div class="tab" :class="{active:o.tab==='assigned'}" @click="o.tab='assigned';o.status='assigned';loadOrders()">设计中</div><div class="tab" :class="{active:o.tab==='delivered'}" @click="o.tab='delivered';o.status='delivered';loadOrders()">已交付</div></div>
+<div class="toolbar">
+  <input class="inp" placeholder="搜索订单号/医院/患者..." v-model="o.s" @keyup.enter="loadOrders()">
+  <select class="sel" v-model="o.status" @change="loadOrders()"><option value="">全部状态</option><option v-for="v in statusList" :value="v.v">{{v.t}}</option></select>
+  <input class="inp" type="date" v-model="o.sd" @change="loadOrders()" style="width:130px">
+  <input class="inp" type="date" v-model="o.ed" @change="loadOrders()" style="width:130px">
+  <button class="btn btn-p" @click="loadOrders()">🔍</button>
+  <button class="btn btn-s" v-if="hasPerm('orders:create')" @click="openOrderForm()">+ 新建订单</button>
+  <button class="btn btn-o" v-if="hasPerm('orders:export')" @click="exportOrders()">📥 导出CSV</button>
+</div>
+<div class="card" style="padding:0">
+<table><thead><tr><th>订单编号</th><th>医院</th><th>科室</th><th>类型</th><th>患者</th><th>部位</th><th>数量</th><th>金额</th><th>状态</th><th>时间</th><th>操作</th></tr></thead><tbody>
+  <tr v-for="r in o.items" :key="r.id">
+    <td style="font-weight:500">{{r.order_no}}</td><td>{{r.hospital_name||'-'}}</td><td>{{r.department_name||'-'}}</td><td>{{r.order_type||'-'}}</td><td>{{r.patient_name||'-'}}</td><td>{{r.body_part||'-'}}</td><td>{{r.quantity}}</td><td>¥{{F(r.total_price)}}</td>
+    <td><span :class="'tag tag-'+r.status">{{S(r.status)}}</span></td><td>{{D(r.created_at)}}</td>
+    <td>
+      <a class="link" @click.prevent="openOd(r.id)">详情</a>
+      <a class="link" v-if="hasPerm('orders:edit')&&r.status==='draft'" @click.prevent="editOrder(r)" style="margin:0 6px">编辑</a>
+      <a class="link" v-if="r.status==='draft'&&hasPerm('orders:submit')" @click.prevent="orderAction(r,'pending')" style="margin-right:6px">提交审核</a>
+      <a class="link" v-if="r.status==='pending'&&hasPerm('orders:assign')" @click.prevent="openAssignModal(r)" style="margin-right:6px">指派</a>
+      <a class="link" v-if="r.status==='assigned'&&hasPerm('orders:design')" @click.prevent="openDesignModal(r)" style="margin-right:6px">设计完成</a>
+      <a class="link" v-if="r.status==='designed'&&hasPerm('orders:receive')" @click.prevent="orderAction(r,'received')" style="margin-right:6px">确认收货</a>
+      <a class="link" v-if="r.status==='received'&&hasPerm('orders:deliver')" @click.prevent="openDeliverModal(r)" style="margin-right:6px">确认交付</a>
+      <a class="link link-d" v-if="r.status!=='cancelled'&&r.status!=='delivered'&&hasPerm('orders:cancel')" @click.prevent="cancelOrder(r)">取消</a>
+    </td>
+  </tr>
+  <tr v-if="!o.items?.length"><td colspan="11" class="empty"><div class="icon">📋</div>暂无订单</td></tr>
+</tbody></table></div>
+<div class="pagination" v-if="o.total>o.pz">
+  <button @click="o.p=1;loadOrders()">首页</button><button @click="if(o.p>1){o.p--;loadOrders()}">‹</button>
+  <span>第{{o.p}}/{{Math.ceil(o.total/o.pz)}}页(共{{o.total}}条)</span>
+  <button @click="if(o.p<Math.ceil(o.total/o.pz)){o.p++;loadOrders()}">›</button>
+</div></div>
+
+<!-- 订单详情 -->
+<div v-if="showOd&&od.data">
+<div class="breadcrumb"><a class="link" @click.prevent="showOd=false">← 返回</a> / <span>订单 {{od.data.order_no}}</span></div>
+<div class="dg-card">
+<div class="dg-card-title">📋 基本信息</div>
+<div class="dg-grid">
+<div class="dg-label">订单编号</div><div class="dg-value" style="font-weight:600;font-size:15px">{{od.data.order_no}}</div>
+<div class="dg-label">患者姓名</div><div class="dg-value"><strong>{{od.data.patient_name||'-'}}</strong></div>
+<div class="dg-label">部位</div><div class="dg-value">{{od.data.body_part||'-'}}</div>
+<div class="dg-label">订单类型</div><div class="dg-value">{{od.data.order_type||'-'}}</div>
+<div class="dg-label">订单状态</div><div class="dg-value"><span :class="'tag tag-'+od.data.status" style="font-size:13px;padding:3px 10px">{{S(od.data.status)}}</span></div>
+<div class="dg-label">紧急</div><div class="dg-value"><span :style="{color:od.data.urgency==='urgent'?'var(--danger)':'var(--sub)',fontWeight:od.data.urgency==='urgent'?600:400}">{{od.data.urgency==='urgent'?'🔥 加急':'常规'}}</span></div>
+</div></div>
+<div class="dg-card">
+<div class="dg-card-title">🏥 医院信息</div>
+<div class="dg-grid">
+<div class="dg-label">医院</div><div class="dg-value"><strong>{{od.data.hospital_name||'-'}}</strong></div>
+<div class="dg-label">科室</div><div class="dg-value">{{od.data.department_name||'-'}}</div>
+<div class="dg-label">代理商</div><div class="dg-value">{{od.data.agent_name||'-'}}</div>
+<div class="dg-label">交付日期</div><div class="dg-value">{{od.data.delivery_date||'-'}}</div>
+<div class="dg-label">销售员</div><div class="dg-value">{{od.data.creator_name||'-'}}</div>
+</div></div>
+<div class="dg-card">
+<div class="dg-card-title">💰 价格信息</div>
+<div class="dg-grid">
+<div class="dg-label">数量</div><div class="dg-value">{{od.data.quantity}}</div>
+<div class="dg-label">单价</div><div class="dg-value">¥{{F(od.data.unit_price)}}</div>
+<div class="dg-label">总价</div><div class="dg-value" style="color:var(--danger);font-weight:600">¥{{F(od.data.total_price)}}</div>
+</div></div>
+<div class="dg-card">
+<div class="dg-card-title">⏱️ 时间信息</div>
+<div class="dg-grid">
+<div class="dg-label">创建时间</div><div class="dg-value">{{D(od.data.created_at)}} {{new Date(od.data.created_at).toLocaleTimeString('zh-CN')}}</div>
+<div class="dg-label">指派时间</div><div class="dg-value">{{od.data.assigned_at?D(od.data.assigned_at)+' '+new Date(od.data.assigned_at).toLocaleTimeString('zh-CN'):'-'}}</div>
+<div class="dg-label">设计完成</div><div class="dg-value">{{od.data.designed_at?D(od.data.designed_at)+' '+new Date(od.data.designed_at).toLocaleTimeString('zh-CN'):'-'}}</div>
+</div></div>
+<div class="dg-card">
+<div class="dg-card-title">👤 人员与备注</div>
+<div class="dg-grid">
+<div class="dg-label">设计师</div><div class="dg-value">{{od.data.engineer_name||'-'}}</div>
+<div class="dg-label">设计备注</div><div class="dg-value">{{od.data.design_note||'-'}}</div>
+<div class="dg-label">交付备注</div><div class="dg-value">{{od.data.delivery_note||'-'}}</div>
+<div class="dg-label">备注</div><div class="dg-value">{{od.data.remark||'-'}}</div>
+<div class="dg-label">取消原因</div><div class="dg-value">{{od.data.cancel_reason||'-'}}</div>
+</div></div>
+<div style="display:flex;gap:6px;flex-wrap:wrap">
+  <button class="btn btn-p btn-sm" v-if="hasPerm('orders:edit')&&od.data.status==='draft'" @click="editOrder(od.data)">编辑</button>
+  <button class="btn btn-s btn-sm" v-if="od.data.status==='draft'&&hasPerm('orders:submit')" @click="orderAction(od.data,'pending')">提交审核</button>
+  <button class="btn btn-p btn-sm" v-if="od.data.status==='pending'&&hasPerm('orders:assign')" @click="openAssignModal(od.data)">指派</button>
+  <button class="btn btn-s btn-sm" v-if="od.data.status==='assigned'&&hasPerm('orders:design')" @click="openDesignModal(od.data)">设计完成</button>
+  <button class="btn btn-s btn-sm" v-if="od.data.status==='designed'&&hasPerm('orders:receive')" @click="orderAction(od.data,'received')">确认收货</button>
+  <button class="btn btn-s btn-sm" v-if="od.data.status==='received'&&hasPerm('orders:deliver')" @click="openDeliverModal(od.data)">确认交付</button>
+  <button class="btn btn-d btn-sm" v-if="od.data.status!=='cancelled'&&od.data.status!=='delivered'&&hasPerm('orders:cancel')" @click="cancelOrder(od.data)">取消订单</button>
+</div>
+
+<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><h3 style="margin:0">附件管理</h3><div><input type="file" ref="fu" @change="uploadFile()" style="display:none" multiple><button class="btn btn-s btn-sm" v-if="hasPerm('orders:upload')" @click="$refs.fu.click()">📎 上传文件</button></div></div>
+<table><thead><tr><th>文件名</th><th>类型</th><th>大小</th><th>类别</th><th>时间</th><th>操作</th></tr></thead><tbody>
+<tr v-for="a in od.data.attachments" :key="a.id"><td>{{a.file_name}}</td><td>{{a.file_type||'-'}}</td><td>{{(a.file_size/1024).toFixed(1)}}KB</td><td>{{a.category||'技术文件'}}</td><td>{{D(a.created_at)}}</td>
+<td><a :href="API+'/api/attachments/'+a.id+'/download'" class="link">下载</a> <a class="link link-d" v-if="hasPerm('orders:edit')" @click.prevent="deleteAttachment(a.id)" style="margin-left:6px">删除</a></td></tr>
+<tr v-if="!od.data.attachments?.length"><td colspan="6" class="empty">暂无附件</td></tr>
+</tbody></table></div></div>
+</div>
+<!-- END order -->
+</template>
+
+<!-- ===== 订单统计 ===== -->
+<template v-if="page==='stat'">
+<div class="toolbar"><input class="inp" type="month" v-model="st.sd" @change="loadStats()"><input class="inp" type="month" v-model="st.ed" @change="loadStats()"><button class="btn btn-p" @click="loadStats()">🔍</button><button class="btn btn-o" @click="exportStats()">📥 导出报表</button></div>
+<div class="chart-row">
+<div class="card"><h3>订单状态分布</h3><table><thead><tr><th>状态</th><th>数量</th><th>金额</th><th>占比</th></tr></thead><tbody>
+<tr v-for="r in st.byStatus" :key="r.status"><td><span :class="'tag tag-'+r.status">{{S(r.status)}}</span></td><td>{{r.count}}</td><td>¥{{F(r.total)}}</td><td>{{st.byStatus.length?Math.round(r.count/st.byStatus.reduce((a,b)=>a+(b.count||0),0)*100):0}}%</td></tr></tbody></table></div>
+<div class="card"><h3>医院订单排名</h3><table><thead><tr><th>#</th><th>医院</th><th>订单</th><th>金额</th></tr></thead><tbody>
+<tr v-for="(r,i) in st.byHospital" :key="r.name"><td>{{i+1}}</td><td>{{r.name}}</td><td>{{r.count}}</td><td>¥{{F(r.total)}}</td></tr></tbody></table></div></div>
+<div class="chart-row">
+<div class="card"><h3>月度趋势</h3><table><thead><tr><th>月份</th><th>订单数</th><th>金额</th></tr></thead><tbody>
+<tr v-for="r in st.byMonth" :key="r.month"><td>{{r.month}}</td><td>{{r.count}}</td><td>¥{{F(r.total)}}</td></tr></tbody></table></div>
+<div class="card"><h3>订单类型分布</h3><table><thead><tr><th>类型</th><th>数量</th></tr></thead><tbody>
+<tr v-for="r in st.byType" :key="r.order_type"><td>{{r.order_type||'未分类'}}</td><td>{{r.count}}</td></tr></tbody></table></div></div>
+</template>
+
+<!-- ===== 代理商 ===== -->
+<template v-if="page==='agent'">
+<div class="toolbar"><input class="inp" placeholder="搜索..." v-model="ag.s" @keyup.enter="loadAgents()"><button class="btn btn-p" @click="loadAgents()">🔍</button><button class="btn btn-s" v-if="hasPerm('agents:create')" @click="openAgentForm()">+ 新增代理商</button></div>
+<div class="card" style="padding:0">
+<table><thead><tr><th>名称</th><th>公司</th><th>省份</th><th>城市</th><th>联系人</th><th>电话</th><th>邮箱</th><th>佣金率</th><th>操作</th></tr></thead><tbody>
+<tr v-for="r in ag.items" :key="r.id"><td><strong>{{r.name}}</strong></td><td>{{r.company||'-'}}</td><td>{{r.province||'-'}}</td><td>{{r.city||'-'}}</td><td>{{r.contact_name||'-'}}</td><td>{{r.contact_phone||'-'}}</td><td>{{r.contact_email||'-'}}</td><td>{{r.commission_rate}}%</td>
+<td><a class="link" v-if="hasPerm('agents:edit')" @click.prevent="editAgent(r)">编辑</a> <a class="link link-d" v-if="hasPerm('agents:delete')" @click.prevent="deleteAgent(r)" style="margin-left:6px">删除</a></td></tr>
+<tr v-if="!ag.items?.length"><td colspan="9" class="empty">暂无代理商</td></tr></tbody></table></div></template>
+
+<!-- ===== 人员管理 ===== -->
+<template v-if="page==='emp'">
+<div class="toolbar"><input class="inp" placeholder="搜索..." v-model="ep.s" @keyup.enter="loadEmployees()"><button class="btn btn-p" @click="loadEmployees()">🔍</button><button class="btn btn-s" v-if="hasPerm('employees:create')" @click="openEmpForm()">+ 新增员工</button></div>
+<div class="card" style="padding:0">
+<table><thead><tr><th>姓名</th><th>部门</th><th>职位</th><th>电话</th><th>邮箱</th><th>负责医院</th><th>归属总部</th><th>操作</th></tr></thead><tbody>
+<tr v-for="r in ep.items" :key="r.id"><td><strong>{{r.name}}</strong></td><td>{{r.dept_name||'-'}}</td><td>{{r.position||'-'}}</td><td>{{r.phone||'-'}}</td><td>{{r.email||'-'}}</td><td>{{getHospNames(r.hospital_ids)||'-'}}</td><td>{{r.is_headquarter?'✅ 是':'❌ 否'}}</td>
+<td><a class="link" v-if="hasPerm('employees:edit')" @click.prevent="editEmp(r)">编辑</a> <a class="link link-d" v-if="hasPerm('employees:delete')" @click.prevent="deleteEmp(r)" style="margin-left:6px">删除</a></td></tr>
+<tr v-if="!ep.items?.length"><td colspan="8" class="empty">暂无员工</td></tr></tbody></table></div></template>
+
+<!-- ===== 用户管理 ===== -->
+<template v-if="page==='user'">
+<div class="toolbar"><input class="inp" placeholder="搜索用户名/姓名..." v-model="us.s" @keyup.enter="loadUsers()"><button class="btn btn-p" @click="loadUsers()">🔍</button><button class="btn btn-s" v-if="hasPerm('users:create')" @click="openUserForm()">+ 新增用户</button></div>
+<div class="card" style="padding:0">
+<table><thead><tr><th>用户名</th><th>真实姓名</th><th>部门</th><th>角色</th><th>电话</th><th>邮箱</th><th>状态</th><th>操作</th></tr></thead><tbody>
+<tr v-for="r in us.items" :key="r.id"><td>{{r.username}}</td><td>{{r.real_name||'-'}}</td><td>{{r.dept_name||'-'}}</td><td>{{r.role_name||'-'}}</td><td>{{r.phone||'-'}}</td><td>{{r.email||'-'}}</td><td><span :class="'tag tag-'+(r.status==='active'?'completed':'cancelled')">{{r.status==='active'?'正常':'禁用'}}</span></td>
+<td><a class="link" v-if="hasPerm('users:edit')" @click.prevent="editUser(r)">编辑</a> <a class="link" v-if="hasPerm('users:edit')" @click.prevent="resetPwd(r)" style="margin:0 6px">重置密码</a> <a class="link link-d" v-if="hasPerm('users:delete')" @click.prevent="deleteUser(r)">删除</a></td></tr>
+<tr v-if="!us.items?.length"><td colspan="8" class="empty">暂无用户</td></tr></tbody></table></div></template>
+
+<!-- ===== 部门管理 ===== -->
+<template v-if="page==='dept'">
+<div class="toolbar"><button class="btn btn-s" v-if="hasPerm('departments:create')" @click="openDeptForm()">+ 新增部门</button></div>
+<div class="card" style="padding:0">
+<table><thead><tr><th>部门名称</th><th>负责人</th><th>创建时间</th><th>操作</th></tr></thead><tbody>
+<tr v-for="r in dp.items" :key="r.id"><td><strong>{{r.name}}</strong></td><td>{{r.leader||'-'}}</td><td>{{D(r.created_at)}}</td>
+<td><a class="link" v-if="hasPerm('departments:edit')" @click.prevent="editDept(r)">编辑</a> <a class="link link-d" v-if="hasPerm('departments:delete')" @click.prevent="deleteDeptSys(r)" style="margin-left:6px">删除</a></td></tr></tbody></table></div></template>
+
+<!-- ===== 权限管理 ===== -->
+<template v-if="page==='role'">
+<div class="toolbar"><button class="btn btn-s" v-if="hasPerm('roles:create')" @click="openRoleForm()">+ 新增角色</button></div>
+<div class="card" style="padding:0">
+<table><thead><tr><th>角色名称</th><th>编码</th><th>权限数量</th><th>创建时间</th><th>操作</th></tr></thead><tbody>
+<tr v-for="r in rl.items" :key="r.id"><td><strong>{{r.name}}</strong></td><td style="font-family:monospace;font-size:12px">{{r.code}}</td><td>{{(r.permissions||[]).length}} 项</td><td>{{D(r.created_at)}}</td>
+<td><a class="link" v-if="hasPerm('roles:edit')" @click.prevent="editRolePerms(r)">配置权限</a> <a class="link" v-if="hasPerm('roles:edit')" @click.prevent="editRole(r)" style="margin:0 6px">改名</a> <a class="link link-d" v-if="hasPerm('roles:delete')" @click.prevent="deleteRole(r)">删除</a></td></tr></tbody></table></div></template>
+
+<!-- ===== 参数配置 ===== -->
+<template v-if="page==='cfg'">
+<div class="card"><h3>系统参数</h3>
+<div class="frow"><div class="fg"><label>系统名称</label><input class="inp" v-model="cfg.system_name"></div><div class="fg"><label>公司名称</label><input class="inp" v-model="cfg.company_name"></div></div>
+<button class="btn btn-p btn-sm" v-if="hasPerm('config:edit')" @click="saveConfig()" style="margin-top:12px">💾 保存</button></div></template>
+
+<!-- ===== 操作日志 ===== -->
+<template v-if="page==='log'">
+<div class="toolbar"><input class="inp" placeholder="搜索..." v-model="lg.s" @keyup.enter="loadLogs()"><input class="inp" type="date" v-model="lg.sd" @change="loadLogs()" style="width:130px"><input class="inp" type="date" v-model="lg.ed" @change="loadLogs()" style="width:130px"><button class="btn btn-p" @click="loadLogs()">🔍</button></div>
+<div class="card" style="padding:0">
+<table><thead><tr><th>时间</th><th>操作</th><th>模块</th><th>详情</th></tr></thead><tbody>
+<tr v-for="r in lg.items" :key="r.id"><td>{{D(r.created_at)}} {{new Date(r.created_at).toLocaleTimeString('zh-CN')}}</td><td>{{r.action}}</td><td>{{r.module||'-'}}</td><td>{{r.detail||'-'}}</td></tr>
+<tr v-if="!lg.items?.length"><td colspan="4" class="empty">暂无日志</td></tr></tbody></table></div></template>
+
+<!-- ===== 系统监控 ===== -->
+<template v-if="page==='mon'">
+<div class="monitor-grid">
+  <div class="monitor-item"><div class="val">{{mn.cpu}}</div><div class="lbl">CPU负载(1min)</div><div class="progress-bar"><div class="fill" :class="mn.cpu>2?'fill-r':mn.cpu>1?'fill-o':'fill-g'" :style="{width:Math.min(mn.cpu*50,100)+'%'}"></div></div></div>
+  <div class="monitor-item"><div class="val">{{mn.freeMem}}</div><div class="lbl">空闲内存 / {{mn.totalMem}}</div></div>
+  <div class="monitor-item"><div class="val">{{mn.uptime}}</div><div class="lbl">运行时间</div></div>
+  <div class="monitor-item"><div class="val">{{mn.dbSize}}</div><div class="lbl">数据库大小</div></div>
+  <div class="monitor-item"><div class="val">{{mn.uploadSize}}</div><div class="lbl">附件存储</div></div>
+  <div class="monitor-item"><div class="val">{{mn.time}}</div><div class="lbl">服务器时间</div></div>
+</div></template>
+
+</div></div></div>
+
+<!-- ===== 弹窗: 医院 ===== -->
+<div class="modal" v-if="hf.show" @click.self="hf.show=false"><div class="modal-content">
+<h3>{{hf.eid?'编辑医院':'新增医院'}}</h3>
+<div class="frow"><div class="fg"><label>名称 *</label><input class="inp" v-model="hf.f.name"></div><div class="fg"><label>简称</label><input class="inp" v-model="hf.f.short_name"></div><div class="fg"><label>省份</label><select class="sel" v-model="hf.f.province"><option value="">选择</option><option v-for="p in provinces" :value="p">{{p}}</option></select></div><div class="fg"><label>城市</label><input class="inp" v-model="hf.f.city"></div><div class="fg"><label>区县</label><input class="inp" v-model="hf.f.district"></div><div class="fg"><label>地址</label><input class="inp" v-model="hf.f.address"></div><div class="fg"><label>等级</label><select class="sel" v-model="hf.f.level"><option value="">选择</option><option>三甲</option><option>三乙</option><option>二甲</option><option>二乙</option><option>民营</option></select></div><div class="fg"><label>类型</label><select class="sel" v-model="hf.f.type"><option value="">选择</option><option>综合</option><option>专科</option><option>口腔</option><option>骨科</option></select></div><div class="fg"><label>联系人</label><input class="inp" v-model="hf.f.contact_name"></div><div class="fg"><label>电话</label><input class="inp" v-model="hf.f.contact_phone"></div><div class="fg"><label>邮箱</label><input class="inp" v-model="hf.f.contact_email"></div><div class="fg"><label>备注</label><input class="inp" v-model="hf.f.remark"></div></div>
+<div class="modal-actions"><button class="btn btn-o" @click="hf.show=false">取消</button><button class="btn btn-p" @click="submitHosp()">保存</button></div></div></div>
+
+<!-- ===== 弹窗: 订单 ===== -->
+<div class="modal" v-if="of.show" @click.self="of.show=false"><div class="modal-content modal-wide">
+<h3>{{of.eid?'编辑订单':'新建订单'}}</h3>
+<div class="frow frow3">
+<div class="fg"><label>医院 *</label><select class="sel" v-model="of.f.hospital_id" @change="onHospChange()"><option value="">选择医院</option><option v-for="r in of.hosps" :value="r.id">{{r.name}}</option></select></div>
+<div class="fg"><label>科室</label><select class="sel" v-model="of.f.department_id"><option value="">选择科室</option><option v-for="d in of.depts" :value="d.id">{{d.name}}</option></select></div>
+<div class="fg"><label>订单类型 *</label><input class="inp" v-model="of.f.order_type" placeholder="如:3D模型打印"></div>
+<div class="fg"><label>患者姓名</label><input class="inp" v-model="of.f.patient_name"></div>
+<div class="fg"><label>部位</label><input class="inp" v-model="of.f.body_part"></div>
+<div class="fg"><label>代理商</label><select class="sel" v-model="of.f.agent_id"><option value="">选择</option><option v-for="a in of.ags" :value="a.id">{{a.name}}</option></select></div>
+<div class="fg"><label>数量</label><input class="inp" type="number" min="1" v-model="of.f.quantity" @input="calcPrice()"></div>
+<div class="fg"><label>单价(元)</label><input class="inp" type="number" step="0.01" v-model="of.f.unit_price" @input="calcPrice()"></div>
+<div class="fg"><label>总价(元)</label><input class="inp" type="number" v-model="of.f.total_price" readonly style="background:#f9fafb"></div>
+<div class="fg"><label>紧急程度</label><select class="sel" v-model="of.f.urgency"><option value="normal">常规</option><option value="urgent">加急</option></select></div>
+<div class="fg"><label>交付日期</label><input class="inp" type="date" v-model="of.f.delivery_date"></div>
+<div class="fg"><label>状态</label><select class="sel" v-model="of.f.status" v-if="of.eid"><option v-for="v in statusList" :value="v.v">{{v.t}}</option></select><span v-else style="padding:7px 0;font-size:13px;color:var(--sub)">草稿</span></div>
+</div>
+<div class="frow" style="margin-top:8px"><div class="fg fg-full"><label>备注</label><textarea class="inp" v-model="of.f.remark" rows="2" style="resize:vertical"></textarea></div><div class="fg fg-full" v-if="of.f.status==='cancelled'"><label>取消原因</label><textarea class="inp" v-model="of.f.cancel_reason" rows="2"></textarea></div></div>
+<div class="modal-actions"><button class="btn btn-o" @click="of.show=false">取消</button><button class="btn btn-p" @click="submitOrder()" :disabled="of.loading">{{of.loading?'保存中...':'保存'}}</button></div></div></div>
+
+<!-- ===== 弹窗: 代理商 ===== -->
+<div class="modal" v-if="af.show" @click.self="af.show=false"><div class="modal-content">
+<h3>{{af.eid?'编辑代理商':'新增代理商'}}</h3>
+<div class="frow"><div class="fg"><label>名称 *</label><input class="inp" v-model="af.f.name"></div><div class="fg"><label>公司</label><input class="inp" v-model="af.f.company"></div><div class="fg"><label>省份</label><select class="sel" v-model="af.f.province"><option value="">选择</option><option v-for="p in provinces" :value="p">{{p}}</option></select></div><div class="fg"><label>城市</label><input class="inp" v-model="af.f.city"></div><div class="fg"><label>联系人</label><input class="inp" v-model="af.f.contact_name"></div><div class="fg"><label>电话</label><input class="inp" v-model="af.f.contact_phone"></div><div class="fg"><label>邮箱</label><input class="inp" v-model="af.f.contact_email"></div><div class="fg"><label>佣金率(%)</label><input class="inp" type="number" step="0.1" v-model="af.f.commission_rate"></div></div>
+<div class="modal-actions"><button class="btn btn-o" @click="af.show=false">取消</button><button class="btn btn-p" @click="submitAgent()">保存</button></div></div></div>
+
+<!-- ===== 弹窗: 员工 ===== -->
+<div class="modal" v-if="ef.show" @click.self="ef.show=false"><div class="modal-content">
+<h3>{{ef.eid?'编辑员工':'新增员工'}}</h3>
+<div class="frow"><div class="fg"><label>姓名 *</label><input class="inp" v-model="ef.f.name"></div><div class="fg"><label>部门</label><select class="sel" v-model="ef.f.department_id"><option value="">选择</option><option v-for="d in dp.items" :value="d.id">{{d.name}}</option></select></div><div class="fg"><label>职位</label><input class="inp" v-model="ef.f.position"></div><div class="fg"><label>电话</label><input class="inp" v-model="ef.f.phone"></div><div class="fg"><label>邮箱</label><input class="inp" v-model="ef.f.email"></div></div>
+<div class="frow"><div class="fg" style="flex:2"><label>负责医院（可多选）</label><div style="max-height:140px;overflow-y:auto;border:1px solid var(--bd);border-radius:6px;padding:6px"><label v-for="h in hp.items" :key="h.id" style="display:flex;align-items:center;gap:6px;padding:3px 0;cursor:pointer"><input type="checkbox" :value="h.id" v-model="ef.f.hospital_ids"><span>{{h.name}}</span></label><div v-if="!hp.items?.length" style="color:var(--sub);padding:6px">暂无医院数据，请先添加医院</div></div></div><div class="fg"><label>归属总部</label><label style="display:flex;align-items:center;gap:6px;margin-top:6px;cursor:pointer"><input type="checkbox" v-model="ef.f.is_headquarter"><span>{{ef.f.is_headquarter?'是':'否'}}</span></label></div></div>
+<div class="modal-actions"><button class="btn btn-o" @click="ef.show=false">取消</button><button class="btn btn-p" @click="submitEmp()">保存</button></div></div></div>
+
+<!-- ===== 弹窗: 用户 ===== -->
+<div class="modal" v-if="uf.show" @click.self="uf.show=false"><div class="modal-content">
+<h3>{{uf.eid?'编辑用户':'新增用户'}}</h3>
+<div class="frow"><div class="fg"><label>用户名 *</label><input class="inp" v-model="uf.f.username"></div><div class="fg"><label>密码</label><input class="inp" type="password" v-model="uf.f.password" :placeholder="uf.eid?'留空不修改':'必填'"></div><div class="fg"><label>真实姓名</label><input class="inp" v-model="uf.f.real_name"></div><div class="fg"><label>手机</label><input class="inp" v-model="uf.f.phone"></div><div class="fg"><label>邮箱</label><input class="inp" v-model="uf.f.email"></div><div class="fg"><label>部门</label><select class="sel" v-model="uf.f.department_id"><option value="">选择</option><option v-for="d in dp.items" :value="d.id">{{d.name}}</option></select></div><div class="fg"><label>角色</label><select class="sel" v-model="uf.f.role_id"><option value="">选择</option><option v-for="r in rl.items" :value="r.id">{{r.name}}</option></select></div><div class="fg" v-if="uf.eid"><label>状态</label><select class="sel" v-model="uf.f.status"><option value="active">正常</option><option value="inactive">禁用</option></select></div></div>
+<div class="modal-actions"><button class="btn btn-o" @click="uf.show=false">取消</button><button class="btn btn-p" @click="submitUser()">保存</button></div></div></div>
+
+<!-- ===== 弹窗: 部门 ===== -->
+<div class="modal" v-if="df.show" @click.self="df.show=false"><div class="modal-content">
+<h3>{{df.eid?'编辑部门':'新增部门'}}</h3>
+<div class="frow"><div class="fg"><label>名称 *</label><input class="inp" v-model="df.f.name"></div><div class="fg"><label>负责人</label><input class="inp" v-model="df.f.leader"></div></div>
+<div class="modal-actions"><button class="btn btn-o" @click="df.show=false">取消</button><button class="btn btn-p" @click="submitDept()">保存</button></div></div></div>
+
+<!-- ===== 弹窗: 角色改名 ===== -->
+<div class="modal" v-if="rf.show" @click.self="rf.show=false"><div class="modal-content">
+<h3>{{rf.eid?'编辑角色':'新增角色'}}</h3>
+<div class="frow"><div class="fg"><label>名称 *</label><input class="inp" v-model="rf.f.name"></div><div class="fg"><label>编码 *</label><input class="inp" v-model="rf.f.code"></div></div>
+<div class="modal-actions"><button class="btn btn-o" @click="rf.show=false">取消</button><button class="btn btn-p" @click="submitRole()">保存</button></div></div></div>
+
+<!-- ===== 弹窗: 权限配置 ===== -->
+<div class="modal" v-if="rp.show" @click.self="rp.show=false"><div class="modal-content" style="max-width:800px">
+<h3>配置权限 - {{rp.role?.name}}</h3>
+<div v-for="(perms,group) in rp.groups" :key="group" class="perm-group">
+  <h4>{{group}}</h4>
+  <div class="perm-list">
+    <label class="perm-item" v-for="p in perms" :key="p.key">
+      <input type="checkbox" :checked="rp.selected.includes(p.key)" @change="togglePerm(p.key)">
+      {{p.name}}
+    </label>
+  </div>
+</div>
+<div style="margin-top:12px;font-size:12px;color:var(--sub)">已选 {{rp.selected.length}} / {{rp.total}} 项</div>
+<div style="margin-top:4px;display:flex;gap:8px">
+  <button class="btn btn-o btn-sm" @click="rp.selected=[]">清空全部</button>
+  <button class="btn btn-o btn-sm" @click="rp.selected=[...rp.all]">全选</button>
+</div>
+<div class="modal-actions"><button class="btn btn-o" @click="rp.show=false">取消</button><button class="btn btn-p" @click="savePerms()">💾 保存权限</button></div></div></div>
+
+<!-- ===== 弹窗: 指派工程师 ===== -->
+<div class="modal" v-if="am.show" @click.self="am.show=false"><div class="modal-content" style="max-width:400px">
+<h3>指派工程师 - {{am.order?.order_no}}</h3>
+<div class="fg" v-if="am.assignees?.length">
+  <label>选择指派人员</label>
+  <select class="sel" v-model="am.selected">
+    <option value="">-- 请选择 --</option>
+    <optgroup label="💻 技术主管" v-if="am.assignees.filter(a=>a.assign_type==='tech_leader').length">
+      <option v-for="a in am.assignees.filter(x=>x.assign_type==='tech_leader')" :value="a.user_id">{{a.real_name||a.username}}</option>
+    </optgroup>
+    <optgroup label="🔧 设计师">
+      <option v-for="a in am.assignees.filter(x=>x.assign_type==='engineer')" :value="a.user_id">{{a.real_name||a.username}}</option>
+    </optgroup>
+  </select>
+</div>
+<div v-else style="color:var(--danger);font-size:13px">该医院暂无可指派人员，请先在医院详情中绑定技术团队</div>
+<div class="modal-actions"><button class="btn btn-o" @click="am.show=false">取消</button><button class="btn btn-p" :disabled="!am.selected" @click="submitAssign()">确认指派</button></div></div></div>
+
+<!-- ===== 弹窗: 设计完成 ===== -->
+<div class="modal" v-if="dm.show" @click.self="dm.show=false"><div class="modal-content" style="max-width:400px">
+<h3>设计完成 - {{dm.order?.order_no}}</h3>
+<div class="fg"><label>设计备注（可选）</label><textarea class="inp" v-model="dm.note" placeholder="示例：STL已出，需确认" rows="3"></textarea></div>
+<div class="modal-actions"><button class="btn btn-o" @click="dm.show=false">取消</button><button class="btn btn-s" @click="submitDesign()">确认设计完成</button></div></div></div>
+
+<!-- ===== 弹窗: 确认交付 ===== -->
+<div class="modal" v-if="dlv.show" @click.self="dlv.show=false"><div class="modal-content" style="max-width:400px">
+<h3>确认交付 - {{dlv.order?.order_no}}</h3>
+<div class="fg"><label>交付备注（可选）</label><textarea class="inp" v-model="dlv.note" placeholder="输入交付备注..." rows="3"></textarea></div>
+<div class="modal-actions"><button class="btn btn-o" @click="dlv.show=false">取消</button><button class="btn btn-s" @click="submitDeliver()">确认交付</button></div></div></div>
+
+<!-- ===== 通知面板 ===== -->
+<div class="modal" v-if="nm.show" @click.self="nm.show=false"><div class="modal-content" style="max-width:600px">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+  <h3 style="margin:0">通知中心</h3>
+  <button class="btn btn-o btn-sm" @click="readAll()" v-if="nm.unread>0">全部已读</button>
+</div>
+<div v-if="!nm.items?.length" class="empty"><div class="icon">🔔</div>暂无通知</div>
+<div v-for="n in nm.items" :key="n.id" :style="{padding:'10px',borderRadius:'6px',marginBottom:'6px',cursor:'pointer',background:n.is_read?'transparent':'#eff6ff',border:n.is_read?'1px solid var(--bd)':'1px solid #bfdbfe'}" @click="readNotif(n)">
+  <div style="font-size:13px;font-weight:600">{{n.title}}</div>
+  <div style="font-size:12px;color:var(--sub);margin-top:2px">{{n.content}}</div>
+  <div style="font-size:11px;color:var(--sub);margin-top:4px;display:flex;gap:8px;justify-content:space-between">
+    <span>{{n.order_no||''}}</span>
+    <span>{{D(n.created_at)}} {{new Date(n.created_at).toLocaleTimeString('zh-CN')}}</span>
+  </div>
+</div>
+<div class="modal-actions"><button class="btn btn-o" @click="nm.show=false">关闭</button></div></div></div>
+
+<div class="toast"><div v-for="(t,i) in toasts" :key="i" :class="'toast-msg '+t.type">{{t.msg}}</div></div>
+</div>
+
+<script src="vue.min.js"></script>
+<script>
+const {createApp}=Vue;
+const API=location.hostname==='localhost'?'http://localhost:'+location.port:'';
+const app=createApp({data(){return{
+  loggedIn:false,loginForm:{username:'',password:''},loginLoading:false,loginErr:'',token:'',
+  user:{},permissions:[],
+  page:'dash',provinces:[],toasts:[],
+  statusList:[{v:'draft',t:'草稿'},{v:'pending',t:'待指派'},{v:'assigned',t:'设计中'},{v:'designed',t:'设计完成'},{v:'received',t:'已收货'},{v:'delivered',t:'已交付'},{v:'cancelled',t:'已取消'}],
+  dh:{orderCount:0,hospitalCount:0,todayOrders:0,monthRevenue:0,pendingOrders:0,agentCount:0,recentOrders:[]},
+  h:{items:[],s:'',p:''},hd:{data:null},showHd:false,showAddDept:false,showAddDoctor:false,nd:{name:'',leader:''},editDeptId:'',ndr:{department_id:'',name:'',title:'',specialty:'',phone:'',email:''},
+  hf:{show:false,eid:'',f:{name:'',short_name:'',province:'',city:'',district:'',address:'',level:'',type:'',contact_name:'',contact_phone:'',contact_email:'',remark:''}},
+  o:{items:[],s:'',status:'',sd:'',ed:'',p:1,pz:20,total:0,tab:'all'},
+  showOd:false,od:{data:null},notifLoading:false,
+  nm:{show:false,items:[],unread:0},
+  am:{show:false,order:null,assignees:[],selected:''},
+  dm:{show:false,order:null,note:''},
+  dlv:{show:false,order:null,note:''},
+  of:{show:false,eid:'',f:{hospital_id:'',department_id:'',agent_id:'',order_type:'',patient_name:'',body_part:'',quantity:1,unit_price:300,total_price:300,urgency:'normal',delivery_date:'',status:'draft',remark:'',cancel_reason:''},hosps:[],ags:[],depts:[],loading:false},
+  st:{byStatus:[],byHospital:[],byMonth:[],byType:[],sd:'',ed:''},
+  ag:{items:[],s:''},af:{show:false,eid:'',f:{name:'',company:'',province:'',city:'',contact_name:'',contact_phone:'',contact_email:'',commission_rate:0}},
+  ep:{items:[],s:''},ef:{show:false,eid:'',f:{name:'',department_id:'',position:'',phone:'',email:'',hospital_ids:[],is_headquarter:false}},hp:{items:[]},
+  us:{items:[],s:''},uf:{show:false,eid:'',f:{username:'',password:'',real_name:'',phone:'',email:'',department_id:'',role_id:'',status:'active'}},
+  dp:{items:[]},df:{show:false,eid:'',f:{name:'',leader:''}},
+  rl:{items:[]},rf:{show:false,eid:'',f:{name:'',code:''}},
+  rp:{show:false,role:null,selected:[],groups:{},total:0,all:[]},
+  cfg:{system_name:'',company_name:''},
+  lg:{items:[],s:'',sd:'',ed:''},
+  mn:{cpu:'0',totalMem:'0',freeMem:'0',uptime:'0',dbSize:'0',uploadSize:'0',time:''}
+}},computed:{pageTitle(){const m={dash:'首页仪表板',hosp:'医院管理',order:'订单管理',stat:'订单统计',agent:'代理商管理',emp:'人员管理',user:'用户管理',dept:'部门管理',role:'权限管理',cfg:'参数配置',log:'操作日志',mon:'系统监控'};return m[this.page]||''}},
+mounted(){this.loadProvinces()},
+methods:{
+  F(n){const v=Number(n);return isNaN(v)?'0':v.toLocaleString('zh-CN',{minimumFractionDigits:0,maximumFractionDigits:2})},
+  D(d){if(!d)return'-';const t=new Date(d.replace(' ','T'));return isNaN(t.getTime())?d.slice(0,10):t.toISOString().slice(0,10)},
+  S(s){const m={draft:'草稿',pending:'待指派',assigned:'设计中',designed:'设计完成',received:'已收货',delivered:'已交付',cancelled:'已取消'};return m[s]||s},
+  hasPerm(p){return this.permissions.includes(p)},
+  async api(method,url,data,isBlob){const opts={method,headers:{'Content-Type':'application/json'}};if(this.token)opts.headers.Authorization='Bearer '+this.token;if(data&&!isBlob)opts.body=JSON.stringify(data);else if(data)opts.body=data;const res=await fetch(API+url,opts);if(res.status===401){this.logout();throw{error:'登录已过期，请重新登录'}}if(isBlob&&res.ok)return res.blob();if(!res.ok){const e=await res.json().catch(()=>({error:'请求失败'}));throw e}return res.json()},
+  toast(msg,type){const t=type||'s';this.toasts.push({msg,type:t});setTimeout(()=>this.toasts.shift(),2500)},
+
+  // 登录
+  async doLogin(){this.loginLoading=true;this.loginErr='';try{const res=await fetch(API+'/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(this.loginForm)});const data=await res.json();if(!res.ok){this.loginErr=data.error||'登录失败';return}this.token=data.token;this.user=data.user;this.permissions=data.permissions||[];this.loggedIn=true;this.loadProvinces();this.loadDash()}catch(e){this.loginErr='网络连接失败，请检查服务是否启动'}finally{this.loginLoading=false}},
+  logout(){this.loggedIn=false;this.token='';this.user={};this.permissions=[];this.page='dash';this.loginForm={username:'admin',password:'admin123'}},
+
+  async loadProvinces(){try{this.provinces=await this.api('get','/api/provinces')}catch(e){}},
+  async loadDash(){try{this.dh=await this.api('get','/api/dashboard')}catch(e){}},
+  doPageOrderDetail(orderNo){this.page='order';this.showOd=false;this.loadOrders();setTimeout(()=>{const found=this.o.items.find(r=>r.order_no===orderNo);if(found)this.openOd(found.id);else{this.toast('请刷新后重试','w')}},500)},
+
+  // 医院
+  async loadHospitals(){try{const p={pageSize:200};if(this.h.s)p.search=this.h.s;if(this.h.p)p.province=this.h.p;const r=await this.api('get','/api/hospitals?'+new URLSearchParams(p));this.h.items=r.items}catch(e){this.toast(e.error||'加载失败','e')}},
+  openHospForm(){this.hf={show:true,eid:'',f:{name:'',short_name:'',province:'',city:'',district:'',address:'',level:'',type:'',contact_name:'',contact_phone:'',contact_email:'',remark:''}}},
+  editHosp(r){this.hf={show:true,eid:r.id,f:{...r}}},
+  async submitHosp(){if(!this.hf.f.name){this.toast('请输入医院名称','e');return}try{if(this.hf.eid)await this.api('put','/api/hospitals/'+this.hf.eid,this.hf.f);else await this.api('post','/api/hospitals',this.hf.f);this.toast(this.hf.eid?'更新成功':'添加成功');this.hf.show=false;this.loadHospitals()}catch(e){this.toast(e.error||'失败','e')}},
+  async deleteHosp(r){if(!confirm('确定删除 '+r.name+'？'))return;try{await this.api('delete','/api/hospitals/'+r.id);this.toast('已删除');this.loadHospitals()}catch(e){this.toast('删除失败','e')}},
+  async openHd(id){try{const r=await this.api('get','/api/hospitals/'+id);this.hd.data=r;this.showHd=true}catch(e){this.toast('加载失败','e')}},
+  async addDept(){if(!this.nd.name){this.toast('请输入科室名称','e');return}try{if(this.editDeptId){await this.api('put','/api/hospitals/'+this.hd.data.id+'/departments/'+this.editDeptId,this.nd);this.editDeptId=''}else await this.api('post','/api/hospitals/'+this.hd.data.id+'/departments',this.nd);this.toast('成功');this.showAddDept=false;this.nd={name:'',leader:''};this.openHd(this.hd.data.id)}catch(e){this.toast('失败','e')}},
+  async deleteDept(id){if(!confirm('确定删除？'))return;try{await this.api('delete','/api/hospitals/'+this.hd.data.id+'/departments/'+id);this.toast('已删除');this.openHd(this.hd.data.id)}catch(e){this.toast('失败','e')}},
+  async addDoctor(){if(!this.ndr.name){this.toast('请输入医生姓名','e');return}try{await this.api('post','/api/hospitals/'+this.hd.data.id+'/doctors',this.ndr);this.toast('添加成功');this.showAddDoctor=false;this.openHd(this.hd.data.id)}catch(e){this.toast('失败','e')}},
+  async deleteDoctor(id){if(!confirm('确定删除？'))return;try{await this.api('delete','/api/hospitals/'+this.hd.data.id+'/doctors/'+id);this.toast('已删除');this.openHd(this.hd.data.id)}catch(e){this.toast('失败','e')}},
+
+  // 订单
+  async loadOrders(){try{const p={page:this.o.p,pageSize:this.o.pz};if(this.o.s)p.search=this.o.s;if(this.o.status)p.status=this.o.status;if(this.o.sd)p.start_date=this.o.sd;if(this.o.ed)p.end_date=this.o.ed;const r=await this.api('get','/api/orders?'+new URLSearchParams(p));this.o.items=r.items;this.o.total=r.total}catch(e){this.toast('加载失败','e')}},
+  async openOrderForm(){this.of.eid='';this.of.f={hospital_id:'',department_id:'',agent_id:'',order_type:'',patient_name:'',body_part:'',quantity:1,unit_price:300,total_price:300,urgency:'normal',delivery_date:'',status:'draft',remark:'',cancel_reason:''};this.of.depts=[];this.of.loading=false;try{const h=await this.api('get','/api/hospitals?pageSize=200');const a=await this.api('get','/api/agents?pageSize=200');this.of.hosps=h.items||[];this.of.ags=a.items||[]}catch(e){}this.of.show=true},
+  async onHospChange(){this.of.f.department_id='';this.of.depts=[];if(!this.of.f.hospital_id)return;try{this.of.depts=await this.api('get','/api/hospitals/'+this.of.f.hospital_id+'/departments')}catch(e){}},
+  calcPrice(){this.of.f.total_price=Math.round((parseInt(this.of.f.quantity)||1)*(parseFloat(this.of.f.unit_price)||0)*100)/100},
+  async editOrder(r){this.of.eid=r.id;this.of.f={...r};this.of.loading=false;this.of.depts=[];try{const h=await this.api('get','/api/hospitals?pageSize=200');this.of.hosps=h.items||[];const a=await this.api('get','/api/agents?pageSize=200');this.of.ags=a.items||[];if(r.hospital_id){const d=await this.api('get','/api/hospitals/'+r.hospital_id+'/departments');this.of.depts=d||[]}}catch(e){}this.of.show=true},
+  async submitOrder(){if(!this.of.f.hospital_id||!this.of.f.order_type){this.toast('请填写医院和订单类型','e');return}this.of.loading=true;try{if(this.of.eid)await this.api('put','/api/orders/'+this.of.eid,this.of.f);else await this.api('post','/api/orders',this.of.f);this.toast(this.of.eid?'更新成功':'创建成功');this.of.show=false;this.loadOrders()}catch(e){this.toast(e.error||'失败','e')}this.of.loading=false},
+  async cancelOrder(r){const reason=prompt('请输入取消原因');if(!reason)return;try{await this.api('put','/api/orders/'+r.id,{status:'cancelled',cancel_reason:reason});this.toast('已取消');this.loadOrders();if(this.showOd&&this.od.data){this.openOd(this.od.data.id)}}catch(e){this.toast('失败','e')}},
+  async orderAction(r,newStatus){const labels={pending:'提交审核',received:'确认收货'};const confirmMsg={pending:'提交审核此订单给技术主管？',received:'确认已收到实物？'};if(!confirm(confirmMsg[newStatus]||'确定操作？'))return;try{await this.api('put','/api/orders/'+r.id,{status:newStatus});this.toast(labels[newStatus]+'成功');this.loadOrders();if(this.showOd&&this.od.data){this.openOd(this.od.data.id)}}catch(e){this.toast('失败','e')}},
+  async openAssignModal(r){try{const d=await this.api('get','/api/orders/'+r.id);this.am.assignees=d.available_assignees||[];this.am.order=r;this.am.selected='';this.am.show=true}catch(e){this.toast('加载失败','e')}},
+  async submitAssign(){if(!this.am.selected){this.toast('请选择指派人员','e');return}try{await this.api('put','/api/orders/'+this.am.order.id,{status:'assigned',engineer_id:this.am.selected});this.toast('指派成功');this.am.show=false;this.loadOrders();if(this.showOd&&this.od.data){this.openOd(this.od.data.id)}}catch(e){this.toast('指派失败','e')}},
+  async openDesignModal(r){this.dm.order=r;this.dm.note='';this.dm.show=true},
+  async submitDesign(){try{await this.api('put','/api/orders/'+this.dm.order.id,{status:'designed',design_note:this.dm.note||''});this.toast('设计完成');this.dm.show=false;this.loadOrders();if(this.showOd&&this.od.data){this.openOd(this.od.data.id)}}catch(e){this.toast('失败','e')}},
+  async openDeliverModal(r){this.dlv.order=r;this.dlv.note='';this.dlv.show=true},
+  async submitDeliver(){try{await this.api('put','/api/orders/'+this.dlv.order.id,{status:'delivered',delivery_note:this.dlv.note||''});this.toast('交付成功');this.dlv.show=false;this.loadOrders();if(this.showOd&&this.od.data){this.openOd(this.od.data.id)}}catch(e){this.toast('失败','e')}},
+  async openNotifPanel(){try{const r=await this.api('get','/api/notifications');this.nm.items=r.items||[];this.nm.unread=r.unread||0;this.nm.show=true;this.loadDash()}catch(e){this.toast('加载失败','e')}},
+  async readNotif(n){try{if(!n.is_read)await this.api('put','/api/notifications/'+n.id+'/read');if(n.order_id){this.page='order';this.showOd=false;this.openOd(n.order_id)}this.nm.show=false}catch(e){}},
+  async readAll(){try{await this.api('put','/api/notifications/read-all');this.toast('全部已读');this.nm.items.forEach(n=>n.is_read=1);this.nm.unread=0;this.loadDash()}catch(e){this.toast('失败','e')}},
+  async openOd(id){try{this.od.data=await this.api('get','/api/orders/'+id);this.showOd=true}catch(e){this.toast('加载失败','e')}},
+  async uploadFile(){const f=this.$refs.fu.files[0];if(!f)return;const fd=new FormData();fd.append('file',f);fd.append('category','technical');try{await fetch(API+'/api/orders/'+this.od.data.id+'/attachments',{method:'POST',headers:{Authorization:'Bearer '+this.token},body:fd});this.toast('上传成功');this.openOd(this.od.data.id)}catch(e){this.toast('上传失败','e')}},
+  async deleteAttachment(id){if(!confirm('确定删除？'))return;try{await this.api('delete','/api/orders/'+this.od.data.id+'/attachments/'+id);this.toast('已删除');this.openOd(this.od.data.id)}catch(e){this.toast('失败','e')}},
+  async exportOrders(){try{const r=await this.api('get','/api/orders?'+new URLSearchParams({pageSize:9999}));const items=r.items||[];const h='订单编号,医院,科室,类型,患者,部位,数量,单价,总价,状态,紧急,备注,交付日期,创建时间\n';const csv=items.map(o=>[o.order_no,o.hospital_name,o.department_name,o.order_type,o.patient_name,o.body_part,o.quantity,o.unit_price,o.total_price,this.S(o.status),o.urgency=='urgent'?'加急':'常规',o.remark||'',o.delivery_date||'',this.D(o.created_at)].map(c=>'"'+(c||'')+'"').join(',')).join('\n');const b=new Blob(['\uFEFF'+h+csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='订单导出.csv';a.click();this.toast('导出成功')}catch(e){this.toast('导出失败','e')}},
+
+  // 统计
+  async loadStats(){try{const p={};if(this.st.sd)p.start_date=this.st.sd+'-01';if(this.st.ed)p.end_date=this.st.ed+'-31';const r=await this.api('get','/api/stats/orders?'+new URLSearchParams(p));Object.assign(this.st,r)}catch(e){this.toast('加载失败','e')}},
+  async exportStats(){try{const p={};if(this.st.sd)p.start_date=this.st.sd+'-01';if(this.st.ed)p.end_date=this.st.ed+'-31';const r=await this.api('get','/api/stats/orders?'+new URLSearchParams(p));let csv='类别,名称,数量,金额\n';(r.byStatus||[]).forEach(x=>csv+=`状态,${this.S(x.status)},${x.count},${x.total}\n`);(r.byHospital||[]).forEach(x=>csv+=`医院,${x.name},${x.count},${x.total}\n`);(r.byMonth||[]).forEach(x=>csv+=`月度,${x.month},${x.count},${x.total}\n`);const b=new Blob(['\uFEFF'+csv],{type:'text/csv'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='统计报表.csv';a.click();this.toast('导出成功')}catch(e){this.toast('导出失败','e')}},
+
+  // 代理商
+  async loadAgents(){if(this.p==='agent'){}try{const p={pageSize:200};if(this.ag.s)p.search=this.ag.s;const r=await this.api('get','/api/agents?'+new URLSearchParams(p));this.ag.items=r.items}catch(e){}},
+  openAgentForm(){this.af={show:true,eid:'',f:{name:'',company:'',province:'',city:'',contact_name:'',contact_phone:'',contact_email:'',commission_rate:0}}},
+  editAgent(r){this.af={show:true,eid:r.id,f:{...r}}},
+  async submitAgent(){if(!this.af.f.name){this.toast('请输入名称','e');return}try{if(this.af.eid)await this.api('put','/api/agents/'+this.af.eid,this.af.f);else await this.api('post','/api/agents',this.af.f);this.toast('成功');this.af.show=false;this.loadAgents()}catch(e){this.toast('失败','e')}},
+  async deleteAgent(r){if(!confirm('确定删除？'))return;try{await this.api('delete','/api/agents/'+r.id);this.toast('已删除');this.loadAgents()}catch(e){this.toast('失败','e')}},
+
+  // 员工
+  async loadEmployees(){try{const p={pageSize:200};if(this.ep.s)p.search=this.ep.s;const r=await this.api('get','/api/employees?'+new URLSearchParams(p));this.ep.items=r.items}catch(e){}},
+  loadHospList(){const _this=this;this.api('get','/api/hospitals?pageSize=500').then(r=>{_this.hp.items=r.items||[]}).catch(()=>{})},
+  getHospNames(ids){if(!ids||!ids.length)return '';const arr=Array.isArray(ids)?ids:(typeof ids==='string'?JSON.parse(ids||'[]'):[]);return arr.map(id=>{const h=this.hp.items.find(x=>x.id===id);return h?h.name:id}).join('、')},
+  openEmpForm(){this.loadDeptIfNeed();this.loadHospList();this.ef={show:true,eid:'',f:{name:'',department_id:'',position:'',phone:'',email:'',hospital_ids:[],is_headquarter:false}}},
+  editEmp(r){this.loadDeptIfNeed();this.loadHospList();let ids=[];if(r.hospital_ids){try{ids=JSON.parse(typeof r.hospital_ids==='string'?r.hospital_ids:'[]')}catch{ids=[]}}this.ef={show:true,eid:r.id,f:{...r,hospital_ids:ids,is_headquarter:!!r.is_headquarter}}},
+  async submitEmp(){if(!this.ef.f.name){this.toast('请输入姓名','e');return}try{if(this.ef.eid)await this.api('put','/api/employees/'+this.ef.eid,this.ef.f);else await this.api('post','/api/employees',this.ef.f);this.toast('成功');this.ef.show=false;this.loadEmployees()}catch(e){this.toast('失败','e')}},
+  async deleteEmp(r){if(!confirm('确定删除？'))return;try{await this.api('delete','/api/employees/'+r.id);this.toast('已删除');this.loadEmployees()}catch(e){this.toast('失败','e')}},
+
+  // 用户
+  async loadUsers(){try{const p={pageSize:200};if(this.us.s)p.search=this.us.s;const r=await this.api('get','/api/users?'+new URLSearchParams(p));this.us.items=r.items}catch(e){}},
+  openUserForm(){this.loadDeptIfNeed();this.loadRoleIfNeed();this.uf={show:true,eid:'',f:{username:'',password:'',real_name:'',phone:'',email:'',department_id:'',role_id:'',status:'active'}}},
+  editUser(r){this.loadDeptIfNeed();this.loadRoleIfNeed();this.uf={show:true,eid:r.id,f:{...r,password:''}}},
+  async submitUser(){if(!this.uf.f.username||(!this.uf.eid&&!this.uf.f.password)){this.toast('请填写用户名和密码','e');return}try{if(this.uf.eid){const d={...this.uf.f};if(!d.password)delete d.password;await this.api('put','/api/users/'+this.uf.eid,d)}else await this.api('post','/api/users',this.uf.f);this.toast('成功');this.uf.show=false;this.loadUsers()}catch(e){this.toast(e.error||'失败','e')}},
+  async resetPwd(r){const pwd=prompt('请输入新密码','123456');if(!pwd)return;try{await this.api('post','/api/users/'+r.id+'/reset-pwd',{password:pwd});this.toast('密码已重置为: '+pwd)}catch(e){this.toast('失败','e')}},
+  async deleteUser(r){if(!confirm('确定删除用户 '+r.username+'？'))return;try{await this.api('delete','/api/users/'+r.id);this.toast('已删除');this.loadUsers()}catch(e){this.toast('失败','e')}},
+
+  // 部门
+  async loadDepartments(){try{this.dp.items=await this.api('get','/api/departments')}catch(e){}},
+  loadDeptIfNeed(){if(!this.dp.items.length)this.loadDepartments()},
+  openDeptForm(){this.df={show:true,eid:'',f:{name:'',leader:''}}},
+  editDept(r){this.df={show:true,eid:r.id,f:{...r}}},
+  async submitDept(){if(!this.df.f.name){this.toast('请输入名称','e');return}try{if(this.df.eid)await this.api('put','/api/departments/'+this.df.eid,this.df.f);else await this.api('post','/api/departments',this.df.f);this.toast('成功');this.df.show=false;this.loadDepartments()}catch(e){this.toast('失败','e')}},
+  async deleteDeptSys(r){if(!confirm('确定删除？'))return;try{await this.api('delete','/api/departments/'+r.id);this.toast('已删除');this.loadDepartments()}catch(e){this.toast('失败','e')}},
+
+  // 角色
+  async loadRoles(){try{this.rl.items=await this.api('get','/api/roles')}catch(e){}},
+  loadRoleIfNeed(){if(!this.rl.items.length)this.loadRoles()},
+  openRoleForm(){this.rf={show:true,eid:'',f:{name:'',code:''}}},
+  editRole(r){this.rf={show:true,eid:r.id,f:{...r}}},
+  async submitRole(){if(!this.rf.f.name||!this.rf.f.code){this.toast('请填写名称和编码','e');return}try{if(this.rf.eid)await this.api('put','/api/roles/'+this.rf.eid,this.rf.f);else await this.api('post','/api/roles',this.rf.f);this.toast('成功');this.rf.show=false;this.loadRoles()}catch(e){this.toast('失败','e')}},
+  async deleteRole(r){if(!confirm('确定删除？'))return;try{await this.api('delete','/api/roles/'+r.id);this.toast('已删除');this.loadRoles()}catch(e){this.toast('失败','e')}},
+
+  // 权限配置
+  async editRolePerms(r){this.rp.role=r;this.rp.selected=[...(r.permissions||[])];try{const groups=await this.api('get','/api/permissions');this.rp.groups=groups;const all=[];Object.values(groups).forEach(arr=>arr.forEach(p=>all.push(p.key)));this.rp.all=all;this.rp.total=all.length}catch(e){}this.rp.show=true},
+  togglePerm(key){const i=this.rp.selected.indexOf(key);if(i>=0)this.rp.selected.splice(i,1);else this.rp.selected.push(key)},
+  async savePerms(){try{await this.api('put','/api/roles/'+this.rp.role.id,{...this.rp.role,permissions:this.rp.selected});this.toast('权限已保存');this.rp.show=false;this.loadRoles()}catch(e){this.toast('保存失败','e')}},
+
+  // 配置
+  async loadConfig(){try{this.cfg=await this.api('get','/api/config')}catch(e){}},
+  async saveConfig(){try{for(const[k,v]of Object.entries(this.cfg))await this.api('put','/api/config',{key:k,value:v});this.toast('配置已保存')}catch(e){this.toast('失败','e')}},
+
+  // 日志
+  async loadLogs(){try{const p={pageSize:100};if(this.lg.s)p.search=this.lg.s;if(this.lg.sd)p.start_date=this.lg.sd;if(this.lg.ed)p.end_date=this.lg.ed;const r=await this.api('get','/api/logs?'+new URLSearchParams(p));this.lg.items=r.items}catch(e){}},
+
+  // 监控
+  async loadMonitor(){try{this.mn=await this.api('get','/api/monitor')}catch(e){this.toast('加载失败','e')}}
+}}).mount('#app');
+</script>
+</body>
+</html>

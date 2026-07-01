@@ -1,0 +1,21 @@
+node_modules/
+.env
+
+*.cjs
+uploads/
+temp/
+check_schema.cjs
+import_4users.cjs
+server/
+
+# 保留种子数据库用于云端初始数据
+!data/order_system.db
+!data/
+
+data/*.bak
+
+server.log
+
+public/index_v2.html
+
+data/order_system_blank.db
