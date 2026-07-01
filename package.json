@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "cd server && npm install && node server_new.js",
+    "start": "cd server && npx node-pre-gyp rebuild -C $(npm root)/better-sqlite3 2>/dev/null; node server_new.js",
     "postinstall": "cd server && npm install"
   },
   "dependencies": {
-    "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.11.1",
-    "body-parser": "^2.3.0",
-    "cors": "^2.8.6",
-    "express": "^5.2.1",
-    "jsonwebtoken": "^9.0.3",
-    "multer": "^2.2.0",
-    "uuid": "^14.0.1"
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.7.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.1"
   }
 }
